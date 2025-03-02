@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Scheme Comparison Tool</title>
+    <style>
+      /* General Styles */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #fff;
+    color: #287ed9;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Light Theme */
+body.light-mode {
+    background-color: #287ed9;
+    color: #fff;
+}
+
+header {
+    background: linear-gradient(90deg, #287ed9, #5aa2ef);
+    padding: 20px;
+    text-align: center;
+    color: #fff;
+    animation: fadeIn 1s ease-in-out;
+}
+
+.container {
+    padding: 20px;
+}
+
+/* Search Section */
+.search-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    gap: 10px;
+}
+
+.search-section input {
+    width: 60%;
+    padding: 10px;
+    border: 1px solid #287ed9;
+    border-radius: 5px;
+    transition: box-shadow 0.3s ease;
+}
+
+.search-section input:focus {
+    box-shadow: 0px 0px 10px #5aa2ef;
+}
+
+.search-section button {
+    background-color: #287ed9;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.search-section button:hover {
+    background-color: #5aa2ef;
+    transform: scale(1.1);
+}
+
+/* Table Styles */
+.scheme-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    overflow-x: auto;
+    background-color: #fff;
+    border-radius: 10px;
+}
+
+.scheme-table th, .scheme-table td {
+    border: 1px solid #287ed9;
+    text-align: left;
+    padding: 10px;
+}
+
+.scheme-table th {
+    background-color: #287ed9;
+    color: #fff;
+}
+
+/* Scheme Card */
+.scheme-card {
+    background-color: #f3f9ff;
+    border: 1px solid #287ed9;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.scheme-card h3 {
+    color: #287ed9;
+}
+
+/* Comparison Summary */
+.summary {
+    display: none;
+    background-color: #f3f9ff;
+    padding: 20px;
+    border: 1px solid #287ed9;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.side-by-side {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+}
+
+.scheme-box {
+    background-color: #e9f4ff;
+    border: 1px solid #287ed9;
+    border-radius: 10px;
+    padding: 15px;
+    min-width: 300px;
+    position: relative;
+}
+
+.scheme-box h3 {
+    color: #287ed9;
+}
+
+.scheme-box p span {
+    font-weight: bold;
+}
+
+.scheme-box button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #ff4d4d;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.scheme-box button:hover {
+    background-color: #e04343;
+}
+
+/* Floating Buttons */
+.floating-btns {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.floating-btns button {
+    background-color: #287ed9;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    animation: bounce 2s infinite;
+}
+
+footer {
+    background-color: #e9f4ff;
+    padding: 10px;
+    text-align: center;
+    margin-top: 20px;
+    color: #287ed9;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+</style>
+</head>
+
+<body>
+    <header>
+        <h1>Government Scheme Comparison Tool</h1>
+        <p>Easily compare child welfare schemes for better decisions</p>
+        <!-- Theme Toggle Button -->
+        <button onclick="toggleTheme()">
+            <i class="fas fa-moon"></i> <!-- Icon for Dark mode -->
+            <i class="fas fa-sun" style="display:none;"></i> <!-- Icon for Light mode (initially hidden) -->
+            Toggle Dark/Light Theme
+        </button>
+        
+    </header>
+
+    <div class="container">
+        <!-- Search Section -->
+        <div class="search-section">
+            <input type="text" id="searchInput" placeholder="Search schemes..." oninput="searchScheme()">
+            <button onclick="searchScheme()">Search</button>
+        </div>
+
+        <!-- Personalized Recommendations Form -->
+        <div class="recommendation-form">
+            <h2>Personalized Recommendations</h2>
+            <form onsubmit="recommendSchemes(event)">
+                <label for="age">Age:</label>
+                <input type="number" id="age" required>
+                <label for="income">Income:</label>
+                <input type="number" id="income" required>
+                <label for="location">Location:</label>
+                <input type="text" id="location" required>
+                <button type="submit">Get Recommendations</button>
+            </form>
+        </div>
+
+        <!-- Schemes List -->
+        <table class="scheme-table" id="schemeTable">
+            <thead>
+                <tr>
+                    <th>Scheme Name</th>
+                    <th>Category</th>
+                    <th>Eligibility</th>
+                    <th>Benefits</th>
+                    <th>Target Group</th>
+                    <th>Duration</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Row 1 -->
+                <tr>
+                    <td>Mid-Day Meal Scheme</td>
+                    <td>Education</td>
+                    <td>All government school children</td>
+                    <td>Free meals during school hours</td>
+                    <td>Children aged 6-14</td>
+                    <td>Ongoing</td>
+                    <td>
+                        <button onclick="compareScheme(this)">Compare</button>
+                        <button onclick="bookmarkScheme(this)">Bookmark</button>
+                        <button onclick="shareScheme(this)">Share</button>
+                    </td>
+                </tr>
+        
+                <!-- Row 2 -->
+                <tr>
+                    <td>Integrated Child Development Scheme</td>
+                    <td>Health</td>
+                    <td>Children under 6 and pregnant women</td>
+                    <td>Supplementary nutrition, immunization</td>
+                    <td>Children, Pregnant Women</td>
+                    <td>Ongoing</td>
+                    <td>
+                        <button onclick="compareScheme(this)">Compare</button>
+                        <button onclick="bookmarkScheme(this)">Bookmark</button>
+                        <button onclick="shareScheme(this)">Share</button>
+                    </td>
+                </tr>
+        
+                <!-- Row 3 -->
+                <tr>
+                    <td>Child Protection Services</td>
+                    <td>Social Welfare</td>
+                    <td>Children in need of protection</td>
+                    <td>Child rescue, rehabilitation</td>
+                    <td>Children at risk</td>
+                    <td>Ongoing</td>
+                    <td>
+                        <button onclick="compareScheme(this)">Compare</button>
+                        <button onclick="bookmarkScheme(this)">Bookmark</button>
+                        <button onclick="shareScheme(this)">Share</button>
+                    </td>
+                </tr>
+        
+                <!-- Row 4 -->
+                <tr>
+                    <td>National Scheme for Incentive to Girls</td>
+                    <td>Education</td>
+                    <td>Girl children in the 10th grade</td>
+                    <td>Financial incentive for education</td>
+                    <td>Girls aged 14-18</td>
+                    <td>Ongoing</td>
+                    <td>
+                        <button onclick="compareScheme(this)">Compare</button>
+                        <button onclick="bookmarkScheme(this)">Bookmark</button>
+                        <button onclick="shareScheme(this)">Share</button>
+                    </td>
+                </tr>
+        
+                <!-- Row 5 -->
+                <tr>
+                    <td>Shagun Scheme</td>
+                    <td>Health</td>
+                    <td>Children in certain age groups</td>
+                    <td>Free health checkups, vaccinations</td>
+                    <td>Children aged 0-12</td>
+                    <td>Ongoing</td>
+                    <td>
+                        <button onclick="compareScheme(this)">Compare</button>
+                        <button onclick="bookmarkScheme(this)">Bookmark</button>
+                        <button onclick="shareScheme(this)">Share</button>
+                    </td>
+                </tr>
+        
+                <!-- Row 6 -->
+                <tr>
+                    <td>Balika Samriddhi Yojana</td>
+                    <td>Education</td>
+                    <td>Girls below the poverty line</td>
+                    <td>Financial aid for education</td>
+                    <td>Girls aged 10-18</td>
+                    <td>5 years</td>
+                    <td>
+                        <button onclick="compareScheme(this)">Compare</button>
+                        <button onclick="bookmarkScheme(this)">Bookmark</button>
+                        <button onclick="shareScheme(this)">Share</button>
+                    </td>
+                </tr>
+        
+                <!-- Row 7 -->
+                <tr>
+                    <td>Rajiv Gandhi Scheme for Empowerment of Adolescent Girls</td>
+                    <td>Social Welfare</td>
+                    <td>Adolescent girls</td>
+                    <td>Empowerment through skill development</td>
+                    <td>Adolescent Girls 11-18</td>
+                    <td>Ongoing</td>
+                    <td>
+                        <button onclick="compareScheme(this)">Compare</button>
+                        <button onclick="bookmarkScheme(this)">Bookmark</button>
+                        <button onclick="shareScheme(this)">Share</button>
+                    </td>
+                </tr>
+        
+                <!-- Row 8 -->
+                <tr>
+                    <td>Child Marriage Prohibition Scheme</td>
+                    <td>Social Welfare</td>
+                    <td>Children under 18</td>
+                    <td>Awareness, Legal Support</td>
+                    <td>Children, Parents</td>
+                    <td>Ongoing</td>
+                    <td>
+                        <button onclick="compareScheme(this)">Compare</button>
+                        <button onclick="bookmarkScheme(this)">Bookmark</button>
+                        <button onclick="shareScheme(this)">Share</button>
+                    </td>
+                </tr>
+        
+                <!-- Row 9 -->
+                <tr>
+                    <td>Suraksha Yojana for Children</td>
+                    <td>Health</td>
+                    <td>Children from disadvantaged backgrounds</td>
+                    <td>Emergency medical support</td>
+                    <td>Children 0-18</td>
+                    <td>Ongoing</td>
+                    <td>
+                        <button onclick="compareScheme(this)">Compare</button>
+                        <button onclick="bookmarkScheme(this)">Bookmark</button>
+                        <button onclick="shareScheme(this)">Share</button>
+                    </td>
+                </tr>
+        
+                <!-- Row 10 -->
+                <tr>
+                    <td>National Creche Scheme</td>
+                    <td>Social Welfare</td>
+                    <td>Children aged 0-6</td>
+                    <td>Free childcare services</td>
+                    <td>Children under 6</td>
+                    <td>Ongoing</td>
+                    <td>
+                        <button onclick="compareScheme(this)">Compare</button>
+                        <button onclick="bookmarkScheme(this)">Bookmark</button>
+                        <button onclick="shareScheme(this)">Share</button>
+                    </td>
+                </tr>
+        
+                <!-- Additional Rows (11-50) follow the same structure as above with similar details. -->
+        
+                <!-- Row 11 -->
+                <tr>
+                    <td>Child Labour Elimination Programme</td>
+                    <td>Social Welfare</td>
+                    <td>Children involved in labor</td>
+                    <td>Rescue, rehabilitation, education</td>
+                    <td>Children aged 5-14</td>
+                    <td>Ongoing</td>
+                    <td>
+                        <button onclick="compareScheme(this)">Compare</button>
+                        <button onclick="bookmarkScheme(this)">Bookmark</button>
+                        <button onclick="shareScheme(this)">Share</button>
+                    </td>
+                </tr>
+        
+                       <!-- Row 11 -->
+        <tr>
+            <td>Child Labour Elimination Programme</td>
+            <td>Social Welfare</td>
+            <td>Children involved in labor</td>
+            <td>Rescue, rehabilitation, education</td>
+            <td>Children aged 5-14</td>
+            <td>Ongoing</td>
+            <td>
+                <button onclick="compareScheme(this)">Compare</button>
+                <button onclick="bookmarkScheme(this)">Bookmark</button>
+                <button onclick="shareScheme(this)">Share</button>
+            </td>
+        </tr>
+
+        <!-- Row 12 -->
+        <tr>
+            <td>Janani Suraksha Yojana</td>
+            <td>Health</td>
+            <td>Pregnant women</td>
+            <td>Safe delivery, transportation</td>
+            <td>Pregnant Women</td>
+            <td>Ongoing</td>
+            <td>
+                <button onclick="compareScheme(this)">Compare</button>
+                <button onclick="bookmarkScheme(this)">Bookmark</button>
+                <button onclick="shareScheme(this)">Share</button>
+            </td>
+        </tr>
+
+        <!-- Row 13 -->
+        <tr>
+            <td>Child Health Scheme</td>
+            <td>Health</td>
+            <td>Children under 5</td>
+            <td>Free health checkups, immunization</td>
+            <td>Children aged 0-5</td>
+            <td>Ongoing</td>
+            <td>
+                <button onclick="compareScheme(this)">Compare</button>
+                <button onclick="bookmarkScheme(this)">Bookmark</button>
+                <button onclick="shareScheme(this)">Share</button>
+            </td>
+        </tr>
+
+        <!-- Row 14 -->
+        <tr>
+            <td>Bal Swasthya Yojana</td>
+            <td>Health</td>
+            <td>Children 0-18</td>
+            <td>Free health checkups and treatments</td>
+            <td>Children aged 0-18</td>
+            <td>Ongoing</td>
+            <td>
+                <button onclick="compareScheme(this)">Compare</button>
+                <button onclick="bookmarkScheme(this)">Bookmark</button>
+                <button onclick="shareScheme(this)">Share</button>
+            </td>
+        </tr>
+
+        <!-- Row 15 -->
+        <tr>
+            <td>National Family Benefit Scheme</td>
+            <td>Social Welfare</td>
+            <td>Families below poverty line</td>
+            <td>Financial assistance for child care</td>
+            <td>Families with children</td>
+            <td>Ongoing</td>
+            <td>
+                <button onclick="compareScheme(this)">Compare</button>
+                <button onclick="bookmarkScheme(this)">Bookmark</button>
+                <button onclick="shareScheme(this)">Share</button>
+            </td>
+        </tr>
+
+        <!-- Row 16 -->
+        <tr>
+            <td>Mother and Child Health Scheme</td>
+            <td>Health</td>
+            <td>Pregnant women and children</td>
+            <td>Health education, free health checkups</td>
+            <td>Pregnant women and children 0-6</td>
+            <td>Ongoing</td>
+            <td>
+                <button onclick="compareScheme(this)">Compare</button>
+                <button onclick="bookmarkScheme(this)">Bookmark</button>
+                <button onclick="shareScheme(this)">Share</button>
+            </td>
+        </tr>
+
+        <!-- Row 17 -->
+        <tr>
+            <td>Pradhan Mantri Matru Vandana Yojana</td>
+            <td>Health</td>
+            <td>Pregnant women</td>
+            <td>Cash incentive for maternity</td>
+            <td>Pregnant women</td>
+            <td>Ongoing</td>
+            <td>
+                <button onclick="compareScheme(this)">Compare</button>
+                <button onclick="bookmarkScheme(this)">Bookmark</button>
+                <button onclick="shareScheme(this)">Share</button>
+            </td>
+        </tr>
+
+        <!-- Row 18 -->
+        <tr>
+            <td>Rashtriya Bal Swasthya Karyakram</td>
+            <td>Health</td>
+            <td>Children in rural areas</td>
+            <td>Health screenings, nutritional support</td>
+            <td>Children under 6</td>
+            <td>Ongoing</td>
+            <td>
+                <button onclick="compareScheme(this)">Compare</button>
+                <button onclick="bookmarkScheme(this)">Bookmark</button>
+                <button onclick="shareScheme(this)">Share</button>
+            </td>
+        </tr>
+
+        <!-- Row 19 -->
+        <tr>
+            <td>Child Welfare Fund</td>
+            <td>Financial Support</td>
+            <td>Children from low-income families</td>
+            <td>Financial aid for education, health</td>
+            <td>Children 0-18</td>
+            <td>Ongoing</td>
+            <td>
+                <button onclick="compareScheme(this)">Compare</button>
+                <button onclick="bookmarkScheme(this)">Bookmark</button>
+                <button onclick="shareScheme(this)">Share</button>
+            </td>
+        </tr>
+
+        <!-- Row 20 -->
+        <tr>
+            <td>National Child Helpline</td>
+            <td>Protection</td>
+            <td>Any child in distress</td>
+            <td>24/7 emergency assistance</td>
+            <td>Children of all ages</td>
+            <td>Ongoing</td>
+            <td>
+                <button onclick="compareScheme(this)">Compare</button>
+                <button onclick="bookmarkScheme(this)">Bookmark</button>
+                <button onclick="shareScheme(this)">Share</button>
+            </td>
+        </tr>
+
+        <!-- Row 21 -->
+        <tr>
+            <td>Universalisation of ICDS</td>
+            <td>Social Welfare</td>
+            <td>Children under 6, pregnant women</td>
+            <td>Health and nutrition support</td>
+            <td>Children aged 0-6</td>
+            <td>Ongoing</td>
+            <td>
+                <button onclick="compareScheme(this)">Compare</button>
+                <button onclick="bookmarkScheme(this)">Bookmark</button>
+                <button onclick="shareScheme(this)">Share</button>
+            </td>
+        </tr>
+
+        <!-- Row 22 -->
+        <tr>
+            <td>Integrated Child Protection Scheme</td>
+            <td>Social Welfare</td>
+            <td>Children in need of care</td>
+            <td>Rescue, rehabilitation, protection</td>
+            <td>Children in distress</td>
+            <td>Ongoing</td>
+            <td>
+                <button onclick="compareScheme(this)">Compare</button>
+                <button onclick="bookmarkScheme(this)">Bookmark</button>
+                <button onclick="shareScheme(this)">Share</button>
+            </td>
+        </tr>
+
+        <!-- Row 23 -->
+        <tr>
+            <td>Awareness Programme on Child Rights</td>
+            <td>Education</td>
+            <td>General public, children</td>
+            <td>Education on child rights</td>
+            <td>Children, Parents</td>
+            <td>Ongoing</td>
+            <td>
+                <button onclick="compareScheme(this)">Compare</button>
+                <button onclick="bookmarkScheme(this)">Bookmark</button>
+                <button onclick="shareScheme(this)">Share</button>
+            </td>
+        </tr>
+
+        <!-- Row 24 -->
+        <tr>
+            <td>Digital Literacy for Children</td>
+            <td>Education</td>
+            <td>Children aged 6-14</td>
+            <td>Free digital learning tools</td>
+            <td>Children in urban and rural areas</td>
+            <td>Ongoing</td>
+            <td>
+                <button onclick="compareScheme(this)">Compare</button>
+                <button onclick="bookmarkScheme(this)">Bookmark</button>
+                <button onclick="shareScheme(this)">Share</button>
+            </td>
+        </tr>
+
+        <!-- Row 25 -->
+        <tr>
+            <td>National Child Development Scheme</td>
+            <td>Education</td>
+            <td>All children under 14</td>
+            <td>Scholarships, financial aid</td>
+            <td>Children 0-14</td>
+            <td>Ongoing</td>
+            <td>
+                <button onclick="compareScheme(this)">Compare</button>
+                <button onclick="bookmarkScheme(this)">Bookmark</button>
+                <button onclick="shareScheme(this)">Share</button>
+            </td>
+        </tr>
+
+        <!-- Continue rows 26-50 with similar structure... -->
+
+            </tbody>
+        </table>
+        
+                    <td>Integrated Child Protection Scheme</td>
+                    <td>Child Protection</td>
+                    <td>Children at risk</td>
+                    <td>Protection services</td>
+                    <td>Vulnerable children</td>
+                    <td>Ongoing</td>
+                    <td>
+                        <button onclick="compareScheme(this)">Compare</button>
+                        <button onclick="bookmarkScheme(this)">Bookmark</button>
+                        <button onclick="shareScheme(this)">Share</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Saved Schemes Section -->
+        <div class="saved-schemes" id="savedSchemes">
+            <h2>Saved Schemes</h2>
+            <div id="savedSchemesList"></div>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="summary" id="summary">
+            <h2>Scheme Comparison Summary</h2>
+            <div class="side-by-side" id="comparisonResult"></div>
+        </div>
+    </div>
+
+    <!-- Floating Action Buttons -->
+    <div class="floating-btns">
+        <button onclick="window.scrollTo(0, 0)">Back to Top</button>
+        <button onclick="alert('Contact Us - Email: info@gov.in')">Contact Us</button>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 Scheme Comparison Tool | All rights reserved</p>
+    </footer>
+
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+        }
+
+        function searchScheme() {
+            let input = document.getElementById('searchInput').value.toLowerCase();
+            let table = document.getElementById('schemeTable');
+            let tr = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < tr.length; i++) {
+                let td = tr[i].getElementsByTagName('td')[0];
+                if (td) {
+                    let text = td.textContent || td.innerText;
+                    tr[i].style.display = text.toLowerCase().indexOf(input) > -1 ? '' : 'none';
+                }
+            }
+        }
+
+        function compareScheme(button) {
+            let row = button.closest('tr');
+            let cells = row.getElementsByTagName('td');
+            let comparisonResult = document.getElementById('comparisonResult');
+            let comparisonDiv = document.createElement('div');
+
+            comparisonDiv.innerHTML = `
+                <div class="scheme-box">
+                    <h3>${cells[0].innerText}</h3>
+                    <p><span>Category:</span> ${cells[1].innerText}</p>
+                    <p><span>Eligibility:</span> ${cells[2].innerText}</p>
+                    <p><span>Benefits:</span> ${cells[3].innerText}</p>
+                    <p><span>Target Group:</span> ${cells[4].innerText}</p>
+                    <p><span>Duration:</span> ${cells[5].innerText}</p>
+                </div>
+            `;
+
+            comparisonResult.appendChild(comparisonDiv);
+            document.getElementById('summary').style.display = 'block';
+        }
+
+        function bookmarkScheme(button) {
+            let row = button.closest('tr');
+            let schemeName = row.getElementsByTagName('td')[0].innerText;
+            let savedSchemesList = document.getElementById('savedSchemesList');
+            let savedDiv = document.createElement('div');
+            savedDiv.innerHTML = `
+                <p>${schemeName} <button onclick="removeSaved(this)">Remove</button></p>
+            `;
+            savedSchemesList.appendChild(savedDiv);
+        }
+
+        function removeSaved(button) {
+            button.parentElement.remove();
+        }
+
+        function shareScheme(button) {
+            let row = button.closest('tr');
+            let schemeName = row.getElementsByTagName('td')[0].innerText;
+            let url = `https://twitter.com/share?text=Check out this scheme: ${schemeName}`;
+            window.open(url, '_blank');
+        }
+
+        function recommendSchemes(event) {
+            event.preventDefault();
+            alert('Personalized recommendations based on your inputs');
+        }
+    </script>
+</body>
+
+</html>
